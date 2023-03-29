@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
+from flask_socketio import SocketIO
 import datetime
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
 # 相当于数据存储
 messages = []
@@ -16,15 +19,16 @@ def index():
         messages_with_timestamps.append(message_with_timestamp)
     messages_with_timestamps.reverse()
 
-    return render_template('index.html.jinja2', messages=messages_with_timestamps)
+    return render_template('index.html', messages=messages_with_timestamps)
 
 
 @app.route('/post/add', methods=['POST'])
 def add_message():
     message = request.form['message']
     messages.append({'message': message, 'timestamp': datetime.datetime.now()})
-    return '', 204
+    socketio.emit('new_message', {'message': message, 'timestamp': datetime.datetime.now()})
+    return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app)
