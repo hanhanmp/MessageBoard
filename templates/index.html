@@ -1,87 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>留言板</title>
     <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.3/css/bulma.min.css">
     <style>
+        section {
+            background-color: white;
+        }
+
         #messages {
-            max-height: 400px;
-            overflow-y: auto;
+            height: 350px;
+            overflow-y: scroll;
+            scrollbar-width: 10px;
+            scrollbar-color: #008080 white;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background-color: #008080;
+            border-radius: 5px;
         }
 
         #add-message {
             margin-top: 20px;
+            border: solid 2px #008080;
+            padding: 10px;
+            border-radius: 5px;
         }
 
         #add-message input,
         #add-message textarea {
             margin-bottom: 10px;
         }
+
+        .box {
+            background-color: #e6f1f4;
+            border-color: #008080;
+        }
     </style>
 </head>
+
 <body>
-<section class="section">
-    <div class="container">
-        <h1 class="title has-text-centered">留言板</h1>
-        <div class="columns">
-            <div class="column is-half is-offset-one-quarter">
-                <h2 class="subtitle">以往留言</h2>
-                <div id="messages">
-                    {% for message in messages %}
+    <section class="section">
+        <div class="container">
+            <h1 class="title has-text-centered">留言板</h1>
+            <div class="columns">
+                <div class="column is-half is-offset-one-quarter">
+                    <h2 class="subtitle">以往留言</h2>
+                    <div id="messages">
+                        {% for message in messages %}
                         <div class="box">
-                            <p>{{ message.timestamp }}:</p>
+                            <p class="subtitle">{{ message.timestamp }}:</p>
                             <p>{{ message.message }}</p>
                         </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-half is-offset-one-quarter">
+                    <h2 class="subtitle">添加留言</h2>
+                    <div id="add-message">
+                        <form action="/post/add" method="POST">
+                            <div class="field">
+                                <label class="label">留言</label>
+                                <div class="control">
+                                    <textarea class="textarea" name="message" placeholder="请输入留言内容"></textarea>
+                                </div>
+                            </div>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button class="button is-link" type="submit">提交</button>
+                                </div>
+                                <div class="control">
+                                    <button class="button is-link is-light" type="reset">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="columns">
-            <div class="column is-half is-offset-one-quarter">
-                <h2 class="subtitle">添加留言</h2>
-                <div id="add-message">
-                    <form action="/post/add" method="POST">
-                        <div class="field">
-                            <label class="label">留言</label>
-                            <div class="control">
-                                <textarea class="textarea" name="message" placeholder="请输入留言内容"></textarea>
-                            </div>
-                        </div>
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <button class="button is-link" type="submit">提交</button>
-                            </div>
-                            <div class="control">
-                                <button class="button is-link is-light" type="reset">重置</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
-<script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-RiGicKMzgT6KrNJr6zqvv6UaT6Uc2kC/kg4x3qbeDzw65PUMoL/AVhZb+B9SZ1zo" crossorigin="anonymous"></script>
-<script>
-    const socket = io();
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js" integrity="sha384-RiGicKMzgT6KrNJr6zqvv6UaT6Uc2kC/kg4x3qbeDzw65PUMoL/AVhZb+B9SZ1zo" crossorigin="anonymous"></script>
+    <script>
+        const socket = io();
 
-    const app = new Vue({
-        el: '#messages',
-        data: {
-            messages: []
-        },
-        mounted() {
-            socket.on('connect', () => {
-                console.log('connected');
-            });
-            socket.on('new_message', (message) => {
-                console.log(message);
-                this.messages.push(message);
-            });
-        }
-    });
-</script>
+        const app = new Vue({
+            el: '#messages',
+            data: {
+                messages: []
+            },
+            mounted() {
+                socket.on('connect', () => {
+                    console.log('connected');
+                });
+                socket.on('new_message', (message) => {
+                    console.log(message);
+                    this.messages.push(message);
+                });
+            }
+        });
+    </script>
 </body>
+
 </html>
